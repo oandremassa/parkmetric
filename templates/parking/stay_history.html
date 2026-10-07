@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load parkmetric %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Historical operations</p><h1>Completed stays</h1></div><a class="button ghost" href="{% url 'export_stays' %}?status=closed&lot={{ request.GET.lot|urlencode }}&q={{ request.GET.q|urlencode }}&start={{ start_date|date:'Y-m-d' }}&end={{ end_date|date:'Y-m-d' }}">Export CSV</a></div>
+<form class="filter-bar" method="get"><label>Unit<select name="lot"><option value="">All</option>{% for lot in lots %}<option value="{{ lot.id }}" {% if request.GET.lot == lot.id|stringformat:"s" %}selected{% endif %}>{{ lot.name }}</option>{% endfor %}</select></label><label>From<input type="date" name="start" value="{{ start_date|date:'Y-m-d' }}"></label><label>To<input type="date" name="end" value="{{ end_date|date:'Y-m-d' }}"></label><label>Search<input type="search" name="q" value="{{ request.GET.q }}" placeholder="Plate or spot"></label><button class="button secondary">Filter</button></form>
+<div class="panel table-wrap"><table><thead><tr><th>Vehicle</th><th>Unit</th><th>Spot</th><th>Entry</th><th>Exit</th><th>Final amount</th><th></th></tr></thead><tbody>
+{% for stay in page_obj %}<tr><td><strong>{{ stay.vehicle_plate_snapshot }}</strong></td><td>{{ stay.parking_lot.name }}</td><td>{{ stay.spot_code_snapshot }}</td><td>{{ stay.entered_at|lot_datetime:stay.parking_lot.timezone }}</td><td>{{ stay.exited_at|lot_datetime:stay.parking_lot.timezone }}</td><td>{{ stay.final_amount }} {{ stay.currency }}</td><td><a href="{% url 'stay_detail' stay.id %}">Details</a></td></tr>{% empty %}<tr><td colspan="7">No completed stays found.</td></tr>{% endfor %}
+</tbody></table></div>{% include "shared/pagination.html" %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Administration</p><h1>{{ edited_user.username }}</h1><p class="muted">Only administrators can change roles and unit access.</p></div></div>
+<div class="split-grid">
+<section class="panel"><h2>Account</h2><form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="save_user">{{ form.as_p }}<button class="button primary">Save account</button></form></section>
+<section class="panel"><h2>Parking access</h2><form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="add_access">{{ access_form.as_p }}<button class="button secondary">Save access</button></form>
+<div class="access-list">{% for access in accesses %}<div class="access-row"><div><strong>{{ access.parking_lot.name }}</strong><small>{{ access.parking_lot.code }}</small></div><form method="post" action="{% url 'access_toggle' access.id %}">{% csrf_token %}<button class="button small {% if access.is_active %}ghost{% else %}secondary{% endif %}">{% if access.is_active %}Disable{% else %}Enable{% endif %}</button></form></div>{% empty %}<p class="muted">No parking access assigned.</p>{% endfor %}</div>
+</section>
+</div>
+{% endblock %}

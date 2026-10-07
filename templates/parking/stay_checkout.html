@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% load parkmetric %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Checkout</p><h1>{{ stay.vehicle.plate }}</h1><p class="muted">{{ stay.parking_lot.name }} · spot {{ stay.spot.code }}</p></div><span class="status status-occupied">Active</span></div>
+<div class="split-grid">
+<section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">Charge preview</p><h2>{{ quote.amount }} {{ quote.currency }}</h2><p class="muted">Estimate calculated at {{ quote.quoted_at }}. The final amount is recalculated when you confirm.</p></div></div>
+  <dl class="detail-list">
+    <div><dt>Entered</dt><dd>{{ stay.entered_at|lot_datetime:stay.parking_lot.timezone }}</dd></div>
+    <div><dt>Grace period</dt><dd>{{ stay.tariff.grace_minutes }} min</dd></div>
+    <div><dt>Billing interval</dt><dd>{{ stay.tariff.interval_minutes }} min · {{ stay.tariff.interval_price }} {{ stay.currency }}</dd></div>
+    <div><dt>24-hour cap</dt><dd>{{ stay.tariff.daily_cap }} {{ stay.currency }}</dd></div>
+    <div><dt>Tariff version</dt><dd>v{{ stay.tariff.version }}</dd></div>
+  </dl>
+  <h3>Breakdown</h3>
+  {% if quote.grace_applied %}<div class="callout success">Within grace period. The stay can be closed with a recorded waiver.</div>{% else %}
+  <div class="table-wrap"><table><thead><tr><th>24h window</th><th>Elapsed</th><th>Intervals</th><th>Uncapped</th><th>Charged</th></tr></thead><tbody>
+  {% for window in quote.windows %}<tr><td>{{ window.window }}</td><td>{{ window.seconds|duration_minutes }} min</td><td>{{ window.intervals }}</td><td>{{ window.uncapped }} {{ stay.currency }}</td><td>{{ window.charged }} {{ stay.currency }}</td></tr>{% endfor %}
+  </tbody></table></div>{% endif %}
+</section>
+<section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">Simulated payment</p><h2>Confirm checkout</h2></div></div>
+  <div class="callout warning"><strong>Simulation only.</strong> No real financial processing or fiscal document is produced.</div>
+  <form method="post" class="stack-form" data-disable-on-submit>{% csrf_token %}
+    {{ form.non_field_errors }}{{ form.idempotency_key }}
+    <label>Accepted amount {{ form.accepted_amount }}<small>The server rejects the checkout if the final calculated amount changes before confirmation.</small>{{ form.accepted_amount.errors }}</label>
+    <label>Simulator result {{ form.simulator_outcome }}{{ form.simulator_outcome.errors }}</label>
+    <button class="button primary" type="submit">Confirm checkout</button>
+  </form>
+</section>
+</div>
+{% endblock %}

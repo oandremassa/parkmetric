@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Overview · ParkMetric{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Operations overview</p><h1>{% if selected_lot %}{{ selected_lot.name }}{% else %}No accessible parking lots{% endif %}</h1><p class="muted">Current capacity is separated from historical activity.</p></div>
+  <a class="button primary" href="{% url 'stay_entry' %}">Register entry</a>
+</div>
+
+<form class="filter-bar" method="get">
+  <label>Parking lot<select name="lot">{% for lot in lots %}<option value="{{ lot.id }}" {% if selected_lot.id == lot.id %}selected{% endif %}>{{ lot.name }}</option>{% endfor %}</select></label>
+  <label>From<input type="date" name="start" value="{{ start_date|date:'Y-m-d' }}"></label>
+  <label>To<input type="date" name="end" value="{{ end_date|date:'Y-m-d' }}"></label>
+  <button class="button secondary">Apply</button>
+</form>
+
+{% if selected_lot %}
+<section class="metric-grid">
+  <article class="metric-card"><span>Current occupancy</span><strong>{{ occupancy.occupancy_pct }}%</strong><small>{{ occupancy.occupied }} of {{ occupancy.total }} active spots</small></article>
+  <article class="metric-card"><span>Available now</span><strong>{{ occupancy.available }}</strong><small>{{ occupancy.blocked }} blocked</small></article>
+  {% if can_view_reports %}
+  <article class="metric-card"><span>Entries</span><strong>{{ metrics.entries }}</strong><small>Entry timestamp in selected period</small></article>
+  <article class="metric-card"><span>Exits</span><strong>{{ metrics.exits }}</strong><small>Exit timestamp in selected period</small></article>
+  <article class="metric-card"><span>Simulated revenue</span><strong>{{ metrics.revenue }} {{ metrics.currency }}</strong><small>Successful simulated payments</small></article>
+  <article class="metric-card"><span>Average ticket</span><strong>{{ metrics.avg_ticket|floatformat:2 }} {{ metrics.currency }}</strong><small>{{ metrics.avg_ticket_denominator }} eligible payments</small></article>
+  <article class="metric-card"><span>Average stay</span><strong>{{ metrics.avg_stay_minutes }} min</strong><small>{{ metrics.avg_stay_denominator }} completed stays</small></article>
+  {% endif %}
+</section>
+
+{% if can_view_reports %}
+<div class="split-grid">
+  <section class="panel">
+    <div class="panel-head"><div><p class="eyebrow">Demand pattern</p><h2>Entries by hour</h2></div></div>
+    <div class="hour-chart" role="img" aria-label="Entries by hour. A text count is displayed for every hour.">
+      {% for item in hourly %}
+      <div class="hour-row {% if item.is_peak %}peak{% endif %}">
+        <span>{{ item.hour|stringformat:"02d" }}:00</span>
+        <div class="bar-track"><span class="bar-fill" style="width: {{ item.bar_pct }}%"></span></div>
+        <strong>{{ item.count }}</strong>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><div><p class="eyebrow">Recent evolution</p><h2>Daily activity</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Entries</th><th>Exits</th><th>Revenue</th></tr></thead><tbody>
+      {% for row in daily_series %}<tr><td>{{ row.day }}</td><td>{{ row.entries }}</td><td>{{ row.exits }}</td><td>{{ row.revenue }} {{ selected_lot.currency }}</td></tr>{% empty %}<tr><td colspan="4">No activity in this period.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+
+<section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">Unit comparison</p><h2>Accessible parking lots</h2><p class="muted">Monetary values remain in each unit's currency and are never summed across currencies.</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Unit</th><th>Occupancy</th><th>Entries</th><th>Exits</th><th>Revenue</th><th>Avg ticket</th></tr></thead><tbody>
+    {% for row in comparison %}<tr><td><strong>{{ row.lot.name }}</strong><small>{{ row.lot.code }}</small></td><td>{{ row.occupancy_pct }}%</td><td>{{ row.entries }}</td><td>{{ row.exits }}</td><td>{{ row.revenue }} {{ row.currency }}</td><td>{{ row.avg_ticket|floatformat:2 }} {{ row.currency }}</td></tr>{% empty %}<tr><td colspan="6">No accessible units.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<div class="split-grid consolidation-grid">
+  <section class="panel">
+    <div class="panel-head"><div><p class="eyebrow">Consolidation</p><h2>Monthly</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Month</th><th>Entries</th><th>Exits</th><th>Revenue</th></tr></thead><tbody>
+      {% for row in monthly_series %}<tr><td>{{ row.bucket|date:"Y-m" }}</td><td>{{ row.entries }}</td><td>{{ row.exits }}</td><td>{{ row.revenue }} {{ selected_lot.currency }}</td></tr>{% empty %}<tr><td colspan="4">No data.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><div><p class="eyebrow">Consolidation</p><h2>Annual</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Year</th><th>Entries</th><th>Exits</th><th>Revenue</th></tr></thead><tbody>
+      {% for row in annual_series %}<tr><td>{{ row.bucket|date:"Y" }}</td><td>{{ row.entries }}</td><td>{{ row.exits }}</td><td>{{ row.revenue }} {{ selected_lot.currency }}</td></tr>{% empty %}<tr><td colspan="4">No data.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% else %}
+<div class="callout"><strong>Operational view.</strong> Historical reports and revenue analytics are available to managers and administrators.</div>
+{% endif %}
+{% else %}
+<div class="empty-state"><h2>No parking lots assigned</h2><p>An administrator must assign at least one unit to this account.</p></div>
+{% endif %}
+{% endblock %}

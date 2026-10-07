@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Administration</p><h1>Users & access</h1></div><a class="button primary" href="{% url 'user_create' %}">New user</a></div>
+<div class="panel table-wrap"><table><thead><tr><th>User</th><th>Name</th><th>Role</th><th>Active</th><th>Unit access</th><th></th></tr></thead><tbody>
+{% for item in users %}<tr><td><strong>{{ item.username }}</strong><small>{{ item.email }}</small></td><td>{{ item.get_full_name|default:"—" }}</td><td>{{ item.get_role_display }}</td><td>{{ item.is_active|yesno:"Yes,No" }}</td><td>{{ item.parking_accesses.count }}</td><td><a href="{% url 'user_edit' item.id %}">Manage</a></td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

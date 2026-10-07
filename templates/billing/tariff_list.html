@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Pricing policy</p><h1>Tariff versions</h1><p class="muted">A stay always keeps the tariff version selected at entry.</p></div></div>
+<div class="unit-actions">{% for lot in lots %}<a class="button secondary" href="{% url 'tariff_create' lot.id %}">New version · {{ lot.code }}</a>{% endfor %}</div>
+<div class="panel table-wrap"><table><thead><tr><th>Unit</th><th>Version</th><th>Name</th><th>Grace</th><th>Interval</th><th>Price</th><th>24h cap</th><th>Effective</th><th>Status</th></tr></thead><tbody>
+{% for t in tariffs %}<tr><td>{{ t.parking_lot.name }}</td><td><strong>v{{ t.version }}</strong></td><td>{{ t.name }}</td><td>{{ t.grace_minutes }} min</td><td>{{ t.interval_minutes }} min</td><td>{{ t.interval_price }} {{ t.parking_lot.currency }}</td><td>{{ t.daily_cap }} {{ t.parking_lot.currency }}</td><td>{{ t.effective_from|date:"Y-m-d H:i" }}</td><td><span class="status {% if t.is_active %}status-free{% else %}status-muted{% endif %}">{% if t.is_active %}Current{% else %}Historical{% endif %}</span></td></tr>{% empty %}<tr><td colspan="9">No tariff versions found.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Configuration</p><h1>{{ title }}</h1></div></div>
+<div class="panel narrow">
+  <form method="post" class="stack-form" data-disable-on-submit>{% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      {% if not field.is_hidden %}
+      <label>{{ field.label }} {{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}</label>
+      {% else %}{{ field }}{% endif %}
+    {% endfor %}
+    <div class="form-actions"><button class="button primary" type="submit">{{ submit_label|default:"Save" }}</button><a class="button ghost" href="javascript:history.back()">Cancel</a></div>
+  </form>
+</div>
+{% endblock %}

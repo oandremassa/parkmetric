@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load parkmetric %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Live operations</p><h1>Active stays</h1></div><a class="button primary" href="{% url 'stay_entry' %}">Register entry</a></div>
+<form class="filter-bar" method="get"><label>Unit<select name="lot"><option value="">All</option>{% for lot in lots %}<option value="{{ lot.id }}" {% if request.GET.lot == lot.id|stringformat:"s" %}selected{% endif %}>{{ lot.name }}</option>{% endfor %}</select></label><label>Search<input type="search" name="q" value="{{ request.GET.q }}" placeholder="Plate or spot"></label><button class="button secondary">Filter</button></form>
+<div class="panel table-wrap"><table><thead><tr><th>Vehicle</th><th>Unit</th><th>Spot</th><th>Entered</th><th>Tariff</th><th></th></tr></thead><tbody>
+{% for stay in page_obj %}<tr><td><strong>{{ stay.vehicle.plate }}</strong></td><td>{{ stay.parking_lot.name }}</td><td>{{ stay.spot.code }}</td><td>{{ stay.entered_at|lot_datetime:stay.parking_lot.timezone }}</td><td>v{{ stay.tariff.version }}</td><td><a class="button small primary" href="{% url 'stay_checkout' stay.id %}">Checkout</a></td></tr>{% empty %}<tr><td colspan="6">No active stays match these filters.</td></tr>{% endfor %}
+</tbody></table></div>{% include "shared/pagination.html" %}
+{% endblock %}

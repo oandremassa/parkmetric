@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load parkmetric %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Read-only history</p><h1>Audit trail</h1><p class="muted">Operational events are recorded inside the corresponding transaction.</p></div></div>
+<form class="filter-bar" method="get"><label>Unit<select name="lot"><option value="">All</option>{% for lot in lots %}<option value="{{ lot.id }}" {% if request.GET.lot == lot.id|stringformat:"s" %}selected{% endif %}>{{ lot.name }}</option>{% endfor %}</select></label><label>Event type<input type="search" name="event_type" value="{{ request.GET.event_type }}" placeholder="stay., payment., tariff."></label><button class="button secondary">Filter</button></form>
+<div class="panel table-wrap"><table><thead><tr><th>Time</th><th>Actor</th><th>Unit</th><th>Event</th><th>Object</th><th>Detail</th></tr></thead><tbody>
+{% for event in page_obj %}<tr><td>{{ event.created_at|lot_datetime:event.parking_lot.timezone }}</td><td>{{ event.actor.username }}</td><td>{{ event.parking_lot.code }}</td><td><strong>{{ event.event_type }}</strong></td><td>{{ event.object_type }} #{{ event.object_id }}</td><td><code>{{ event.detail }}</code></td></tr>{% empty %}<tr><td colspan="6">No audit records found.</td></tr>{% endfor %}
+</tbody></table></div>{% include "shared/pagination.html" %}
+{% endblock %}

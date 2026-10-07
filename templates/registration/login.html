@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Sign in · ParkMetric{% endblock %}
+{% block auth_content %}
+<section class="auth-card">
+  <div class="brand auth-brand"><span class="brand-mark">PM</span><div><strong>ParkMetric</strong><small>Operations & intelligence</small></div></div>
+  <h1>Sign in</h1>
+  <p class="muted">Use your assigned account to access parking operations.</p>
+  <form method="post" class="stack-form">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <label>Username {{ form.username }}</label>
+    <label>Password {{ form.password }}</label>
+    <button class="button primary" type="submit">Sign in</button>
+  </form>
+</section>
+{% endblock %}

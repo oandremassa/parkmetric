@@ -1,0 +1,71 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ParkMetric parking operations and analytics">
+  <title>{% block title %}ParkMetric{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script defer src="{% static 'js/app.js' %}"></script>
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark">PM</span>
+      <div><strong>ParkMetric</strong><small>Operations & intelligence</small></div>
+    </div>
+    <nav aria-label="Primary navigation">
+      <a href="{% url 'dashboard' %}">Overview</a>
+      <a href="{% url 'stay_entry' %}" class="nav-accent">Register entry</a>
+      <a href="{% url 'stay_active' %}">Active stays</a>
+      <a href="{% url 'spot_list' %}">Parking spots</a>
+      <a href="{% url 'vehicle_list' %}">Vehicles</a>
+      <a href="{% url 'stay_history' %}">Stay history</a>
+      <a href="{% url 'payments_list' %}">Payments</a>
+      {% if user.role == "manager" or user.role == "admin" or user.is_superuser %}
+      <a href="{% url 'tariff_list' %}">Tariffs</a>
+      <a href="{% url 'audit_list' %}">Audit trail</a>
+      {% endif %}
+      <a href="{% url 'lot_list' %}">Parking lots</a>
+      {% if user.role == "admin" or user.is_superuser %}
+      <a href="{% url 'user_list' %}">Users & access</a>
+      {% endif %}
+      <a href="{% url 'swagger-ui' %}">API documentation</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <span>{{ user.get_full_name|default:user.username }}</span>
+        <small>{{ user.get_role_display }}</small>
+      </div>
+      <a href="{% url 'password_change' %}">Change password</a>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+        <button class="link-button" type="submit">Sign out</button>
+      </form>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-button" type="button" aria-controls="sidebar" aria-expanded="false" data-menu-toggle>Menu</button>
+      <div class="unit-context">
+        <span>Accessible units</span>
+        <strong>{{ nav_parking_lots|length }}</strong>
+      </div>
+    </header>
+    <div class="content">
+      {% if messages %}
+      <div class="messages" aria-live="polite">
+        {% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% else %}
+<main class="auth-shell">{% block auth_content %}{% endblock %}</main>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_DB: parkmetric_test
+          POSTGRES_USER: parkmetric
+          POSTGRES_PASSWORD: parkmetric
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U parkmetric -d parkmetric_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      SECRET_KEY: ci-not-for-production
+      DATABASE_URL: postgresql://parkmetric:parkmetric@127.0.0.1:5432/parkmetric_test
+      DJANGO_SETTINGS_MODULE: config.settings.test
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements-dev.txt
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py migrate
+      - run: python manage.py check --deploy --settings=config.settings.production
+        env:
+          SECRET_KEY: ci-production-check-secret
+          ALLOWED_HOSTS: example.com
+          CSRF_TRUSTED_ORIGINS: https://example.com
+          DATABASE_URL: postgresql://parkmetric:parkmetric@127.0.0.1:5432/parkmetric_test
+          SECURE_SSL_REDIRECT: "true"
+          SESSION_COOKIE_SECURE: "true"
+          CSRF_COOKIE_SECURE: "true"
+      - run: python manage.py spectacular --file /tmp/openapi.yml --validate
+      - run: ruff check .
+      - run: pytest

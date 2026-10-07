@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Configuration</p><h1>Parking lots</h1><p class="muted">Units available to your account.</p></div>{% if user.role == "admin" or user.is_superuser %}<a class="button primary" href="{% url 'lot_create' %}">New parking lot</a>{% endif %}</div>
+<div class="card-grid">
+{% for lot in lots %}
+<article class="panel compact-card"><div class="panel-head"><div><h2>{{ lot.name }}</h2><p class="muted">{{ lot.code }}</p></div><span class="status {% if lot.is_active %}status-free{% else %}status-muted{% endif %}">{% if lot.is_active %}Active{% else %}Inactive{% endif %}</span></div>
+<dl class="detail-list"><div><dt>Timezone</dt><dd>{{ lot.timezone }}</dd></div><div><dt>Currency</dt><dd>{{ lot.currency }}</dd></div><div><dt>Address</dt><dd>{{ lot.address|default:"—" }}</dd></div></dl>
+<div class="card-actions"><a class="button ghost" href="{% url 'spot_list' %}?lot={{ lot.id }}">View spots</a>{% if user.role == "admin" or user.is_superuser %}<a class="button secondary" href="{% url 'lot_edit' lot.id %}">Edit</a>{% endif %}</div>
+</article>
+{% empty %}<div class="empty-state"><h2>No parking lots</h2><p>No accessible units were found.</p></div>{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Capacity management</p><h1>Parking spots</h1></div>{% if user.role == "manager" or user.role == "admin" or user.is_superuser %}<a class="button primary" href="{% url 'spot_create' %}">New spot</a>{% endif %}</div>
+<form class="filter-bar" method="get"><label>Unit<select name="lot"><option value="">All</option>{% for lot in lots %}<option value="{{ lot.id }}" {% if request.GET.lot == lot.id|stringformat:"s" %}selected{% endif %}>{{ lot.name }}</option>{% endfor %}</select></label><label>Status<select name="status"><option value="">All</option>{% for value,label in statuses %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label><label>Search<input type="search" name="q" value="{{ request.GET.q }}" placeholder="Spot code"></label><button class="button secondary">Filter</button></form>
+<div class="panel table-wrap"><table><thead><tr><th>Unit</th><th>Spot</th><th>Status</th><th>Active</th><th>Notes</th><th></th></tr></thead><tbody>
+{% for spot in page_obj %}<tr><td>{{ spot.parking_lot.name }}</td><td><strong>{{ spot.code }}</strong></td><td><span class="status status-{{ spot.status }}">{{ spot.get_status_display }}</span></td><td>{{ spot.is_active|yesno:"Yes,No" }}</td><td>{{ spot.notes|default:"—" }}</td><td>{% if user.role == "manager" or user.role == "admin" or user.is_superuser %}<a href="{% url 'spot_edit' spot.id %}">Edit</a>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="6">No spots match these filters.</td></tr>{% endfor %}
+</tbody></table></div>
+{% include "shared/pagination.html" %}
+{% endblock %}

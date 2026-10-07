@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Vehicle registry</p><h1>Vehicles</h1></div><a class="button primary" href="{% url 'vehicle_create' %}">New vehicle</a></div>
+<form class="filter-bar" method="get"><label>Search<input type="search" name="q" value="{{ request.GET.q }}" placeholder="Plate, make or model"></label><button class="button secondary">Search</button></form>
+<div class="panel table-wrap"><table><thead><tr><th>Plate</th><th>Country</th><th>Make / model</th><th>Color</th><th></th></tr></thead><tbody>
+{% for vehicle in page_obj %}<tr><td><strong>{{ vehicle.plate }}</strong></td><td>{{ vehicle.country }}</td><td>{{ vehicle.make|default:"—" }} {{ vehicle.model }}</td><td>{{ vehicle.color|default:"—" }}</td><td><a href="{% url 'vehicle_edit' vehicle.id %}">Edit</a></td></tr>{% empty %}<tr><td colspan="5">No vehicles found.</td></tr>{% endfor %}
+</tbody></table></div>{% include "shared/pagination.html" %}
+{% endblock %}
