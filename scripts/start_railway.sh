@@ -2,7 +2,7 @@
 set -eu
 
 export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.production}"
-
+export PYTHONPATH="${PYTHONPATH:-}:/app"
 python scripts/wait_for_db.py
 python manage.py migrate --noinput
 
